@@ -17,12 +17,12 @@ class TestSuite extends FunSuite {
 
     Rand.reSeed(1)
     val pTruth = 0.6
-    val N = 1000
+    val N = 100
     val M = 100
     val x = Vector.fill(N)(Rand.nextBinomial(M,pTruth).toInt)
 
     class State(val p:Double) extends dpmm.mcmc.Gibbs.State {
-      val cs = .2
+      val cs = .1
       def logPrior(p:Double) = 0.0
       def logLike(p:Double) = 
         Vector.tabulate(N)(i=>x(i)*log(p)+(M-x(i))*log(1-p)).sum

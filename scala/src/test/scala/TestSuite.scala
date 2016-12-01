@@ -49,31 +49,29 @@ class TestSuite extends FunSuite {
     assert(math.abs(pSim.sum/pSim.length - pTruth) < 1E-1)
   }
 
-  test("DP Test") {
-    def simV(setV: Set[Double], n: Int): Vector[Double] = {
-      setV.foreach{ uv => require(uv>0 && uv < 1) }
-      val J = setV.size
-      val uv = setV.toVector
-      val out = Vector.fill(n)(uv(Rand.nextInt(0,J-1)))
-      if (out.toSet == setV) out else simV(setV, n)
-    }
-
-    val N = 100
+  def simParam(setParam: Set[Double], n: Int): Vector[Double] = {
+    val J = setParam.size
+    val uParam = setParam.toVector
+    val out = Vector.fill(n)(uParam(Rand.nextInt(0,J-1))) 
+    if (out.toSet == setParam) out else simParam(setParam, n)
+  }
+  test("DP Binomial Test") {
+    val N = 30
     val M = 100
-    val vTruth = simV(Set(.1,.9), N).sorted
+    val vTruth = simParam(Set(.1,.9), N).sorted
     val x = Vector.tabulate(N)(i => Rand.nextBinomial(M,vTruth(i)))
 
     class State(val v:Vector[Double]) extends Gibbs.State {
       def update() = {
         def logf(vi:Double,i:Int) = {
           if (vi < 0 || vi > 1) Double.NegativeInfinity else
-            log(x(i)) * vi + log(M-x(i)) * (1-vi)
+            x(i) * log(vi) + (M-x(i)) * log(1-vi)
         }
         def logg0(vi:Double) = 0.0
         def rg0() = Rand.nextUniform(0,1)
 
         new State(Neal.algo8(alpha=0.1, v, logf, logg0, rg0, cs=5, 
-                             clusterUpdates=5))
+                             clusterUpdates=1))
       }
     }
 
@@ -89,20 +87,68 @@ class TestSuite extends FunSuite {
     R eval """
     pdf("src/test/output/plots.pdf")
 
-    par(mfrow=c(1,3))
-    plot(numClus, main="Number of Clusters")
+    #par(mfrow=c(1,3))
+    #plot(numClus, main="Number of Clusters")
 
     plot(vTruth,pch=20,ylim=c(0,1),main='v',
          col='grey30',fg='grey',ylab='')
     points(apply(v,2,mean),lwd=2,col='blue',cex=1.3)
     add.errbar(t(apply(v,2,quantile,c(.025,.975))),co=rgb(0,0,1,.2))
 
-    plot(v[,ncol(v)],col=rgb(.5,.5,.5,.3),type='l',
-         ylim=c(0,1),fg='grey',main='trace plot for v_100')
+    #plot(v[,ncol(v)],col=rgb(.5,.5,.5,.3),type='l',
+    #     ylim=c(0,1),fg='grey',main='trace plot for v_100')
 
-    par(mfrow=c(1,1))
+    #par(mfrow=c(1,1))
     dev.off()
     """
   }
+
+  test("DP Normal Test") {
+    val N = 30
+    val muTruth = simParam(Set(.5,5.0), N).sorted
+    val x = Vector.tabulate(N)(i => Rand.nextGaussian(muTruth(i),.5))
+
+    class State(val mu:Vector[Double]) extends Gibbs.State {
+      val sd = 10.0
+      def update() = {
+        def logf(mui:Double,i:Int) = 
+          -pow(x(i) - mui,2) / 2.0
+        def logg0(mui:Double) = -mui*mui / (2.0 * sd*sd)
+        def rg0() = Rand.nextGaussian(0,sd)
+
+        new State(Neal.algo8(alpha=1, mu, logf, logg0, rg0, cs=.1, 
+                             clusterUpdates=1))
+      }
+    }
+
+    val init = new State(Vector.fill(N)(0))
+    val out = timer {init.sample(B=2000,burn=12000,printEvery=100)}
+    val mu = out.map(_.mu.toArray).toArray
+    println("acc mu: "+mu.map(_.head).distinct.length.toDouble / out.length)
+    //println(mu.map(_.head).distinct.toVector)
+
+    R.x = x.toArray
+    R.mu = mu
+    R.muTruth = muTruth.toArray
+    R.numClus = mu.map( mut => mut.distinct.length )
+    R eval """
+    pdf("src/test/output/plotMu.pdf")
+
+    #par(mfrow=c(1,2))
+    #plot(numClus, main="Number of Clusters")
+
+    plot(x)
+    points(muTruth,pch=20, col='grey30',fg='grey',ylab='')
+    points(apply(mu,2,mean),lwd=2,col='blue',cex=1.3)
+    add.errbar(t(apply(mu,2,quantile,c(.025,.975))),co=rgb(0,0,1,.2))
+
+    #plot(mu[,ncol(mu)],col=rgb(.5,.5,.5,.3),type='l',
+    #     fg='grey',main='trace plot for mu')
+
+    #par(mfrow=c(1,1))
+    dev.off()
+    """
+  }
+
 
 }

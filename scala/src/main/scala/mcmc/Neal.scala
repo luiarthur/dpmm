@@ -6,6 +6,7 @@ object Neal {
   def algo8(alpha: Double, t: Vector[Double],
     logf: (Double,Int)=>Double, 
     logg0: Double=>Double, rg0: ()=>Double,
+    mh:(Double,Double=>Double,Double=>Double,Double)=>Double=MH.metropolis, 
     cs: Double, clusterUpdates:Int) = { // assumes m = 1
 
     def f(x:Double,i:Int) = math.exp(logf(x,i))
@@ -40,7 +41,7 @@ object Neal {
         def lp(v:Double) = 0.0
 
         def loop(v:Double,it:Int):Double = 
-          if (it==0) v else MH.metropolis(v,v=>ll(v)+lp(v),cs)
+          if (it==0) v else MH.metropolis(v,ll,lp,cs)
           //if (it==0) v else MH.metLogit(v,ll,lp,cs) 
 
         val newVal = loop(curr,clusterUpdates)

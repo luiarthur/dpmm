@@ -4,7 +4,8 @@ import dpmm.util.Rand
 
 object MH {
   // metropolis step with normal random walk
-  def metropolis(curr:Double,logLikePlusLogPrior:Double=>Double,candSig:Double) = {
+  def metropolis(curr:Double,ll:Double=>Double,lp:Double=>Double,candSig:Double) = {
+    def logLikePlusLogPrior(x:Double) = ll(x) + lp(x)
     val cand = Rand.nextGaussian(curr,candSig)
     val u = math.log(Rand.nextUniform(0,1))
     val p = logLikePlusLogPrior(cand) - logLikePlusLogPrior(curr)
@@ -18,14 +19,12 @@ object MH {
     def logit(p:Double) = math.log(p / (1-p))
     def invLogit(x:Double) = 1.0 / (1.0 + math.exp(-x))
 
-    def logLikePlusLogLogitPrior(logitP: Double) = {
+    def logLogitPrior(logitP: Double) = {
       val p = invLogit(logitP)
       val logJ = -logitP + 2*math.log(p)
-      val logPriorLogitP = lp(p) + logJ 
-
-      ll(p) + logPriorLogitP
+      lp(p) + logJ 
     }
 
-    invLogit(metropolis(logit(curr), logLikePlusLogLogitPrior, candSig))
+    invLogit(metropolis(logit(curr), ll, lp, candSig))
   }
 }

@@ -15,8 +15,8 @@ class TestSuite extends FunSuite {
   library(rcommon)
   """
 
+  Rand.reSeed(1)
   test("MH for Binomial data") {
-    Rand.reSeed(1)
     val pTruth = 0.6
     val N = 100
     val M = 100
@@ -41,10 +41,12 @@ class TestSuite extends FunSuite {
     println("Truth:          " + pTruth)
     println("Posterior Mean: " + round(pSim.sum / pSim.length,4)+"\n")
 
-    //R.p = pSim.toArray
-    //R eval " plotPost(p) "
+    R.p = pSim.toArray
+    R eval " pdf('src/test/output/binom.pdf') "
+    R eval " plotPost(p) "
+    R eval " dev.off() "
 
-    assert(math.abs(pSim.sum/pSim.length - pTruth) < 1E-2)
+    assert(math.abs(pSim.sum/pSim.length - pTruth) < 1E-1)
   }
 
   test("DP Test") {
@@ -56,43 +58,48 @@ class TestSuite extends FunSuite {
       if (out.toSet == setV) out else simV(setV, n)
     }
 
-    Rand.reSeed(1)
     val N = 100
     val M = 100
-    val vTruth = simV(Set(.1,.5,.9), N)
+    val vTruth = simV(Set(.1,.9), N).sorted
     val x = Vector.tabulate(N)(i => Rand.nextBinomial(M,vTruth(i)))
 
     class State(val v:Vector[Double]) extends Gibbs.State {
       def update() = {
-        def logf(vi:Double,i:Int) = log(x(i)) * vi + log(M-x(i)) * (1-vi)
+        def logf(vi:Double,i:Int) = {
+          if (vi < 0 || vi > 1) Double.NegativeInfinity else
+            log(x(i)) * vi + log(M-x(i)) * (1-vi)
+        }
         def logg0(vi:Double) = 0.0
         def rg0() = Rand.nextUniform(0,1)
 
-        new State(Neal.algo8(alpha=0.001, v, logf, logg0, rg0, cs=0.1, 
-                             clusterUpdates=10))
+        new State(Neal.algo8(alpha=0.1, v, logf, logg0, rg0, cs=5, 
+                             clusterUpdates=5))
       }
     }
 
     val init = new State(Vector.fill(N)(.5))
-    val out = timer {init.sample(B=2000,burn=10000,printEvery=100)}
+    val out = timer {init.sample(B=2000,burn=12000,printEvery=100)}
     val v = out.map(_.v.toArray).toArray
+    println("acc v1: "+v.map(_.head).distinct.length.toDouble / out.length)
+    //println(v.map(_.head).distinct.toVector)
 
     R.v = v
     R.vTruth = vTruth.toArray
     R.numClus = v.map( vt => vt.distinct.length )
     R eval """
     pdf("src/test/output/plots.pdf")
-    ord <- order(vTruth)
 
     par(mfrow=c(1,3))
     plot(numClus, main="Number of Clusters")
 
-    plot(vTruth[ord],pch=20,ylim=c(0,1),main='v',
+    plot(vTruth,pch=20,ylim=c(0,1),main='v',
          col='grey30',fg='grey',ylab='')
-    points(apply(v,2,mean)[ord],lwd=2,col='blue',cex=1.3)
-    add.errbar(t(apply(v,2,quantile,c(.025,.975)))[ord,],co=rgb(0,0,1,.2))
+    points(apply(v,2,mean),lwd=2,col='blue',cex=1.3)
+    add.errbar(t(apply(v,2,quantile,c(.025,.975))),co=rgb(0,0,1,.2))
 
-    plot(v[,ord[ncol(v)]],col=rgb(.5,.5,.5,.3),type='l',ylim=c(0,1),fg='grey',main='trace plot for v_100')
+    plot(v[,ncol(v)],col=rgb(.5,.5,.5,.3),type='l',
+         ylim=c(0,1),fg='grey',main='trace plot for v_100')
+
     par(mfrow=c(1,1))
     dev.off()
     """

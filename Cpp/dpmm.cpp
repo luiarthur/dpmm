@@ -52,12 +52,13 @@ double metropolis(double curr, std::function<double(double)> ll, std::function<d
 
 double metLogit(double curr, std::function<double(double)> ll, std::function<double(double)> lp, double stepSig)
 {
-  auto logLogitPrior = [lp](double logit_p) { // capture lp in []
+  auto lp_logit = [lp](double logit_p) { // capture lp in []
     double p = invLogit(logit_p);
     double log_J = -logit_p + 2 * log(p);
     return lp(p) + log_J;
   };
-  return invLogit(metropolis(logit(curr), ll, logLogitPrior, stepSig));
+  auto ll_logit = [ll](double logit_p) { return ll(invLogit(logit_p)); };
+  return invLogit(metropolis(logit(curr), ll_logit, lp_logit, stepSig));
 }
 
 

@@ -61,4 +61,20 @@ double metLogit(double curr, std::function<double(double)> ll, std::function<dou
   return invLogit(metropolis(logit(curr), ll_logit, lp_logit, stepSig));
 }
 
+int wsample_index(double *p, int n) {
+  int sum_of_weight = 0;
+  for(int i=0; i<n; i++) {
+     sum_of_weight += p[i];
+  }
+  int rnd = R::runif(0,sum_of_weight);
+  for(int i=0; i<n; i++) {
+    if(rnd < p[i])
+      return i;
+    rnd -= p[i];
+  }
+}
+
+double wsample(double *x, double *p, int n) {
+  return x[wsample_index(p,n)];
+}
 

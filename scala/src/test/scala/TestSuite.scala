@@ -58,19 +58,18 @@ class TestSuite extends FunSuite {
   test("DP Binomial Test") {
     val N = 30
     val M = 100
-    val vTruth = simParam(Set(.1,.9), N).sorted
+    val vTruth = simParam(Set(.1,.5,.9), N).sorted
     val x = Vector.tabulate(N)(i => Rand.nextBinomial(M,vTruth(i)))
 
     class State(val v:Vector[Double]) extends Gibbs.State {
       def update() = {
         def logf(vi:Double,i:Int) = {
-          if (vi < 0 || vi > 1) Double.NegativeInfinity else
             x(i) * log(vi) + (M-x(i)) * log(1-vi)
         }
         def logg0(vi:Double) = 0.0
         def rg0() = Rand.nextUniform(0,1)
 
-        new State(Neal.algo8(alpha=0.1, v, logf, logg0, rg0, cs=.1, 
+        new State(Neal.algo8(alpha=1, v, logf, logg0, rg0, cs=.01, 
                              mh=MH.metLogit,clusterUpdates=1))
       }
     }
@@ -78,8 +77,8 @@ class TestSuite extends FunSuite {
     val init = new State(Vector.fill(N)(.5))
     val out = timer {init.sample(B=2000,burn=12000,printEvery=100)}
     val v = out.map(_.v.toArray).toArray
+    println(v.map(_.head).distinct.length)
     println("acc v1: "+v.map(_.head).distinct.length.toDouble / out.length)
-    //println(v.map(_.head).distinct.toVector)
 
     R.v = v
     R.vTruth = vTruth.toArray
@@ -94,6 +93,9 @@ class TestSuite extends FunSuite {
          col='grey30',fg='grey',ylab='')
     points(apply(v,2,mean),col='blue',cex=2)
     add.errbar(t(apply(v,2,quantile,c(.025,.975))),col='blue')
+
+    minor <- function() plot(v[,1],col='grey',type='l',bty='n',axes=F,xlab='',ylab='')
+    plotInPlot(minor,'topleft')
 
     #plot(v[,ncol(v)],col=rgb(.5,.5,.5,.3),type='l',
     #     ylim=c(0,1),fg='grey',main='trace plot for v_100')
@@ -116,7 +118,7 @@ class TestSuite extends FunSuite {
         def logg0(mui:Double) = -mui*mui / (2.0 * sd*sd)
         def rg0() = Rand.nextGaussian(0,sd)
 
-        new State(Neal.algo8(alpha=1, mu, logf, logg0, rg0, cs=.1, 
+        new State(Neal.algo8(alpha=1, mu, logf, logg0, rg0, cs=1, 
                              mh=MH.metropolis,clusterUpdates=1))
       }
     }

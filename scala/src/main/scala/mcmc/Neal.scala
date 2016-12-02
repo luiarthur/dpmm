@@ -16,7 +16,6 @@ object Neal {
       sa._1 ++ sa._2.tail
     }
 
-    // check this FIXME
     def updateAt(i: Int, t: Vector[Double]): Vector[Double] = {
       if (i == n) t else {
         val tMinus = removeAt(i,t)
@@ -38,10 +37,9 @@ object Neal {
         val idx = tWithIndex.filter(_._1 == curr).map(_._2)
 
         def ll(v:Double) = idx.map( logf(v,_) ).sum
-        def lp(v:Double) = 0.0
 
         def loop(v:Double,it:Int):Double = 
-          if (it==0) v else mh(v,ll,lp,cs)
+          if (it==0) v else mh(v,ll,logg0,cs)
 
         val newVal = loop(curr,clusterUpdates)
 

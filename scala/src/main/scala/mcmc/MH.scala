@@ -25,6 +25,8 @@ object MH {
       lp(p) + logJ 
     }
 
-    invLogit(metropolis(logit(curr), ll, logLogitPrior, candSig))
+    def llLogit(logitP:Double) = ll(invLogit(logitP))
+
+    invLogit(metropolis(logit(curr), llLogit, logLogitPrior, candSig))
   }
 }

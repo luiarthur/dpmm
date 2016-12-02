@@ -23,13 +23,13 @@ class TestSuite extends FunSuite {
     val x = Vector.fill(N)(Rand.nextBinomial(M,pTruth).toInt)
 
     case class State(val p:Double) extends Gibbs.State {
-      val cs = .1
       def logPrior(p:Double) = 0.0
       def logLike(p:Double) = 
         Vector.tabulate(N)(i=>x(i)*log(p)+(M-x(i))*log(1-p)).sum
 
       def update() = 
-        new State(MH.metLogit(p, logLike, logPrior, cs))
+        new State(MH.metLogit(p, logLike, logPrior, candSig=.1))
+        //new State(MH.metropolis(p, logLike, logPrior, candSig=0.03))
     }
 
     val init = new State(.5)
@@ -69,7 +69,7 @@ class TestSuite extends FunSuite {
         def logg0(vi:Double) = 0.0
         def rg0() = Rand.nextUniform(0,1)
 
-        new State(Neal.algo8(alpha=1, v, logf, logg0, rg0, cs=.01, 
+        new State(Neal.algo8(alpha=1, v, logf, logg0, rg0, cs=1, 
                              mh=MH.metLogit,clusterUpdates=1))
       }
     }
@@ -77,7 +77,6 @@ class TestSuite extends FunSuite {
     val init = new State(Vector.fill(N)(.5))
     val out = timer {init.sample(B=2000,burn=12000,printEvery=100)}
     val v = out.map(_.v.toArray).toArray
-    println(v.map(_.head).distinct.length)
     println("acc v1: "+v.map(_.head).distinct.length.toDouble / out.length)
 
     R.v = v

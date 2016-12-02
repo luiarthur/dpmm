@@ -41,8 +41,7 @@ object Neal {
         def lp(v:Double) = 0.0
 
         def loop(v:Double,it:Int):Double = 
-          if (it==0) v else MH.metropolis(v,ll,lp,cs)
-          //if (it==0) v else MH.metLogit(v,ll,lp,cs) 
+          if (it==0) v else mh(v,ll,lp,cs)
 
         val newVal = loop(curr,clusterUpdates)
 

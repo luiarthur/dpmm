@@ -160,7 +160,7 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
     }
 
     if (printEvery > 0 && i % printEvery == 0) {
-      Rcout << "\rProgress:  " << i << "\t";
+      Rcout << "\rProgress:  " << i << "/" << B+burn << "\t";
     }
   }
 

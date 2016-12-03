@@ -142,7 +142,6 @@ NumericVector algo8(double alpha, NumericVector t,
   return NumericVector(newT.begin(), newT.end());
 }
 
-// need a wrapper for R. Then, test speed.
 //[[Rcpp::export]]
 NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int B, int burn, int printEvery) {
 

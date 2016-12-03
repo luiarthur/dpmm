@@ -87,20 +87,11 @@ NumericVector algo8(double alpha, NumericVector t,
       if (map_t_count.find( tMinus[j] ) != map_t_count.end()) 
       { // if key exists
         map_t_count[tMinus[j]]++;
-        std::cout << map_t_count[tMinus[j]] <<std::endl;
       } else {
         map_t_count[tMinus[j]] = 1;
       }
     }
 
-    //for (int j=0; j<v.size(); j++) {
-    //  if (m.find( v[j] ) != m.end()) {
-    //    m[v[j]] = m[v[j]] + 1;
-    //  } else {
-    //    m[v[j]] = 1;
-    //  }
-    //}
-    
     double aux;
     if (map_t_count.find(newT[i]) != map_t_count.end()) {
       aux = rg0();
@@ -158,7 +149,7 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
   NumericMatrix out(y.size(),B);
   out(_,0) = NumericVector(y.size(),0.5);
 
-  auto lf = [y,m](double p, int i) {return y[i]*log(p), (m[i]-y[i])*log(1-p);};
+  auto lf = [y,m](double p, int i) {return y[i]*log(p)+(m[i]-y[i])*log(1-p);};
   auto lg0 = [](double p){return 0.0;};
   auto rg0 = [](){return R::runif(0,1);};
 

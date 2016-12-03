@@ -33,7 +33,7 @@ class TestSuite extends FunSuite {
     }
 
     val init = new State(.5)
-    val samples = timer{ init.sample(B=10000,burn=1000,printEvery=1000) }
+    val samples = timer{ init.sample(B=2000,burn=10000,printEvery=1000) }
     val pSim = samples.map(_.p)
 
     println("\nOutput for Binomial Simulation")
@@ -75,7 +75,7 @@ class TestSuite extends FunSuite {
     }
 
     val init = new State(Vector.fill(N)(.5))
-    val out = timer {init.sample(B=2000,burn=12000,printEvery=100)}
+    val out = timer {init.sample(B=2000,burn=10000,printEvery=100)}
     val v = out.map(_.v.toArray).toArray
     println("acc v1: "+v.map(_.head).distinct.length.toDouble / out.length)
 
@@ -123,7 +123,7 @@ class TestSuite extends FunSuite {
     }
 
     val init = new State(Vector.fill(N)(0))
-    val out = timer {init.sample(B=2000,burn=12000,printEvery=100)}
+    val out = timer {init.sample(B=2000,burn=10000,printEvery=100)}
     val mu = out.map(_.mu.toArray).toArray
     println("acc mu: "+mu.map(_.head).distinct.length.toDouble / out.length)
     //println(mu.map(_.head).distinct.toVector)

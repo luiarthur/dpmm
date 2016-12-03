@@ -17,8 +17,7 @@ function update(v::Vector{Float64})
   DPMM.neal8(alpha,v,lf,lg0,rg0,DPMM.metLogit,cs)
 end
 
-#@time out = DPMM.gibbs(fill(.5,N), update, 2000, 12000, printFreq=100);
-out = DPMM.gibbs(fill(.5,N), update, 4, 0, printFreq=100);
+@time out = DPMM.gibbs(fill(.5,N), update, 2000, 10000, printFreq=100);
 
 v = hcat(out...)'
 acc = vec(mapslices(vj -> length(unique(vj))/size(v,1), v, 1))

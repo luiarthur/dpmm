@@ -17,24 +17,6 @@ double invLogit(double x) {
   return 1 / (1 + exp(-x));
 }
 
-/* This is the function pointer way. Not ideal because I can't write metLogit this way.
-double metropolis(double curr, double(*ll)(double), double(*lp)(double), double stepSig)
-{
-  double cand = R::rnorm(curr,stepSig);
-  double u = R::runif(0,1);
-  double out;
-
-  if (ll(cand) + lp(cand) - ll(curr) - lp(curr) > log(u)) {
-    out = cand;
-  } else {
-    out = curr;
-  }
-
-  return out;
-}
-*/
-
-// uses lambdas
 double metropolis(double curr, std::function<double(double)> ll, std::function<double(double)> lp, double stepSig)
 {
   const auto cand = R::rnorm(curr, stepSig);

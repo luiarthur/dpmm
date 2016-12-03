@@ -158,7 +158,12 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
     } else {
       out(_,i-burn) = algo8(alpha,out(_,i-burn-1),lf,lg0,rg0,metLogit,cs);
     }
+
+    if (printEvery > 0 && i % printEvery == 0) {
+      Rcout << "\rProgress:  " << i << "\t";
+    }
   }
 
+  Rcout << std::endl;
   return out;
 }

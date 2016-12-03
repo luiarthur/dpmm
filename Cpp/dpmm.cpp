@@ -19,8 +19,8 @@ double invLogit(double x) {
 
 double metropolis(double curr, std::function<double(double)> ll, std::function<double(double)> lp, double stepSig)
 {
-  const auto cand = R::rnorm(curr, stepSig);
-  const auto u = R::runif(0,1);
+  const double cand = R::rnorm(curr,stepSig);
+  const double u = R::runif(0,1);
   double out;
 
   if (ll(cand) + lp(cand) - ll(curr) - lp(curr) > log(u)) {
@@ -43,20 +43,36 @@ double metLogit(double curr, std::function<double(double)> ll, std::function<dou
   return invLogit(metropolis(logit(curr), ll_logit, lp_logit, stepSig));
 }
 
-int wsample_index(double *p, int n) {
-  int sum_of_weight = 0;
-  for(int i=0; i<n; i++) {
-     sum_of_weight += p[i];
-  }
-  int rnd = R::runif(0,sum_of_weight);
-  for(int i=0; i<n; i++) {
-    if(rnd < p[i])
-      return i;
-    rnd -= p[i];
-  }
+
+int wsample_index(NumericVector p) { // GOOD
+  double p_sum = std::accumulate(p.begin(), p.end(), 0.0);
+  double u = R::runif(0,p_sum);
+  int i = 0;
+  double cumsum = 0;
+
+  do {
+    cumsum += p[i];
+    i++;
+  } while (cumsum < u);
+
+  return i-1;
 }
 
-double wsample(double *x, double *p, int n) {
-  return x[wsample_index(p,n)];
+double wsample(NumericVector x, NumericVector p) { // GOOD
+  return x[wsample_index(p)];
 }
 
+NumericVector algo8(double alpha, NumericVector t, 
+                    std::function<double(double,int)> lf,
+                    std::function<double(double)> lg0,
+                    std::function<double()> rg0,
+                    std::function<double(double,
+                                         std::function<double(double)>,
+                                         std::function<double(double)>,
+                                         double)> mh,
+                    double cs, double clusterUpdates) {
+  auto f = [lf](double x, int i){ return exp(lf(x,i)); };
+  int n = t.size();
+
+  return t;
+}

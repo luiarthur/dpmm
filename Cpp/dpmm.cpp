@@ -71,7 +71,7 @@ NumericVector algo8(double alpha, NumericVector t,
                                          std::function<double(double)>,
                                          std::function<double(double)>,
                                          double)> mh,
-                    double cs, double clusterUpdates) {
+                    double cs) {
   auto f = [lf](double x, int i){ return exp(lf(x,i)); };
   const int n = t.size();
   std::vector<double> newT(t.begin(), t.end());
@@ -87,10 +87,19 @@ NumericVector algo8(double alpha, NumericVector t,
       if (map_t_count.find( tMinus[j] ) != map_t_count.end()) 
       { // if key exists
         map_t_count[tMinus[j]]++;
+        std::cout << map_t_count[tMinus[j]] <<std::endl;
       } else {
         map_t_count[tMinus[j]] = 1;
       }
     }
+
+    //for (int j=0; j<v.size(); j++) {
+    //  if (m.find( v[j] ) != m.end()) {
+    //    m[v[j]] = m[v[j]] + 1;
+    //  } else {
+    //    m[v[j]] = 1;
+    //  }
+    //}
     
     double aux;
     if (map_t_count.find(newT[i]) != map_t_count.end()) {
@@ -101,20 +110,20 @@ NumericVector algo8(double alpha, NumericVector t,
     double probAux = alpha * f(aux,i);
 
     const int K = map_t_count.size();
-    double probExisting[K+1];
+    double prob[K+1];
     double unique_t[K+1];
     
-    probExisting[0] = probAux;
+    prob[0] = probAux;
     unique_t[0] = aux;
 
     int k=1;
     for (auto const& ut : map_t_count) {
-      probExisting[k] = ut.second * f(ut.first,i);
+      prob[k] = ut.second * f(ut.first,i);
       unique_t[k] = ut.first;
       k++;
     }
 
-    newT[i] = unique_t[wsample_index(probExisting,K)];
+    newT[i] = unique_t[wsample_index(prob,K)];
   }
 
   // update by cluster
@@ -126,19 +135,16 @@ NumericVector algo8(double alpha, NumericVector t,
       map_t_idx[newT[i]] = {i};
     }
   }
-  int k = 0;
   for (auto const& ut : map_t_idx) {
     auto idx = ut.second;
     auto ll = [idx,lf](double tj) {
       double out = 0;
-      for (int i=0; i<idx.size(); i++) {
-        out += lf(tj,idx[i]);
-      }
+      for (int i=0; i<idx.size(); i++) { out += lf(tj,idx[i]); }
       return out;
     };
     auto new_tj = mh(ut.first, ll, lg0, cs);
     for (int i=0; i<idx.size(); i++) {
-      newT[i] = new_tj;
+      newT[idx[i]] = new_tj;
     }
   }
 
@@ -146,3 +152,23 @@ NumericVector algo8(double alpha, NumericVector t,
 }
 
 // need a wrapper for R. Then, test speed.
+//[[Rcpp::export]]
+NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int B, int burn, int printEvery) {
+
+  NumericMatrix out(y.size(),B);
+  out(_,0) = NumericVector(y.size(),0.5);
+
+  auto lf = [y,m](double p, int i) {return y[i]*log(p), (m[i]-y[i])*log(1-p);};
+  auto lg0 = [](double p){return 0.0;};
+  auto rg0 = [](){return R::runif(0,1);};
+
+  for (int i=0; i<B+burn; i++) {
+    if (i <= burn) {
+      out(_,0) = algo8(alpha,out(_,0),lf,lg0,rg0,metLogit,cs);
+    } else {
+      out(_,i-burn) = algo8(alpha,out(_,i-burn-1),lf,lg0,rg0,metLogit,cs);
+    }
+  }
+
+  return out;
+}

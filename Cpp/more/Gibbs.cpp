@@ -32,20 +32,32 @@
 
 
 #include<vector>
+#include<iostream>
 
 class GibbsState {
   public: 
     virtual GibbsState* update() const = 0;
     double cool() { return 100; };
-    virtual GibbsState** sample(int B, int burn, int printEvery) {
-      GibbsState** out = new GibbsState*[B];
 
-      for (int i=0; i<B; i++) {
-        out[i] = this;
+    virtual std::vector<GibbsState*> sample(int B, int burn, int printEvery) {
+      std::vector<GibbsState*> out;
+      out.reserve(B);
+      out[0] = this;
+
+      for (int i=0; i<B+burn; i++) {
+        if (i <= burn) {
+          out[0] = out[0]->update();
+        } else {
+          out[i-burn] = out[i-burn-1]->update();
+        }
+
+        if (printEvery > 0 && i % printEvery == 0) {
+          std::cout << "\rProgress:  " << i << "/" << B+burn << "\t";
+        }
       }
 
       return out;
-    };
+    }
 }
 
 class State : public GibbsState {
@@ -64,5 +76,5 @@ s2->p = 20
 s1->p
 s2->p
 
-auto x = s1->sample(10,3,0)
-(x[0]).p
+auto x = s1->sample(10,3,1)
+static_cast<State*>(x[9]) -> p

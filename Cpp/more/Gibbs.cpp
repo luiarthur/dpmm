@@ -37,9 +37,8 @@ class GibbsState {
   public: 
     virtual GibbsState* update() const = 0;
     double cool() { return 100; };
-    virtual std::vector<GibbsState*> sample(int B, int burn, int printEvery) {
-      std::vector<GibbsState*> out;
-      out.reserve(B);
+    virtual GibbsState** sample(int B, int burn, int printEvery) {
+      GibbsState** out = new GibbsState*[B];
 
       for (int i=0; i<B; i++) {
         out[i] = this;
@@ -66,3 +65,4 @@ s1->p
 s2->p
 
 auto x = s1->sample(10,3,0)
+(x[0]).p

@@ -76,28 +76,29 @@ NumericVector algo8(double alpha, NumericVector t,
   const int n = t.size();
   std::vector<double> newT(t.begin(), t.end());
 
+  // create a map of unique t's
+  std::map<double,int> map_t_count;
+  for (int i=0; i<n; i++) {
+    if (map_t_count.find( t[i] ) != map_t_count.end()) 
+    { // if key exists
+      map_t_count[t[i]]++;
+    } else {
+      map_t_count[t[i]] = 1;
+    }
+  }
+
   // update each element in t
   for (int i=0; i<n; i++) {
-    auto tMinus = newT; 
-    tMinus.erase(tMinus.begin()+i);
-
-    // create a map of unique t's
-    std::map<double,int> map_t_count;
-    for (int j=0; j<(n-1); j++) {
-      if (map_t_count.find( tMinus[j] ) != map_t_count.end()) 
-      { // if key exists
-        map_t_count[tMinus[j]]++;
-      } else {
-        map_t_count[tMinus[j]] = 1;
-      }
-    }
+    map_t_count[newT[i]]--;
 
     double aux;
-    if (map_t_count.find(newT[i]) != map_t_count.end()) {
+    if (map_t_count[newT[i]] > 0) {
       aux = rg0();
     } else {
       aux = newT[i];
+      map_t_count.erase(newT[i]);
     }
+
     double probAux = alpha * f(aux,i);
 
     const int K = map_t_count.size();
@@ -115,6 +116,11 @@ NumericVector algo8(double alpha, NumericVector t,
     }
 
     newT[i] = unique_t[wsample_index(prob,K)];
+    if (map_t_count.find( newT[i] ) != map_t_count.end()) {
+      map_t_count[newT[i]]++;
+    } else {
+      map_t_count[newT[i]] = 1;
+    }
   }
 
   // update by cluster

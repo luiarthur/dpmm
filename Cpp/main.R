@@ -2,7 +2,7 @@ library(rcommon)
 library(Rcpp)
 sourceCpp("dpmm.cpp")
 
-N <- 600
+N <- 1000
 p <- sort(sample(c(.1,.3,.5,.7,.9),N,replace=TRUE))
 
 m <- rep(100,N)

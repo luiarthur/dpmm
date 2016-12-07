@@ -2,7 +2,7 @@ library(rcommon)
 library(Rcpp)
 sourceCpp("dpmm.cpp")
 
-N <- 1000
+N <- 1000 # 16 seconds on big screwtape
 p <- sort(sample(c(.1,.3,.5,.7,.9),N,replace=TRUE))
 
 m <- rep(100,N)

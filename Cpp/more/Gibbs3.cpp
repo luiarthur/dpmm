@@ -5,7 +5,7 @@ class GibbsState {
   public:
     virtual GibbsState* update() const = 0;
 
-    std::vector<GibbsState*> sample(int B, int burn, int printEvery) {
+    virtual std::vector<GibbsState*> sample(int B, int burn, int printEvery) {
       std::vector<GibbsState*> out(B);
       out[0] = this;
 
@@ -42,4 +42,8 @@ s->update()->mu
 auto x = s->sample(10,5,1)
 static_cast<State*>(x[0]) -> mu
 
+auto y = static_cast<State*>(x[0])
 
+std::vector<State*> v(x.size())
+for (int i=0; i<x.size(); i++) { v[i] = static_cast<State*>(x[i]); }
+std::copy(x.begin(), x.end(), v.begin());

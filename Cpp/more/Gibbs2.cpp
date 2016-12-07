@@ -3,6 +3,7 @@
 
 class State {
   public:
+    // Generic sample function
     std::vector<State*> sample(int B, int burn, int printEvery) {
       std::vector<State*> out;
       out.reserve(B);
@@ -22,7 +23,8 @@ class State {
 
       return out;
     }
-    // implement the following:
+
+    // Implement the following:
     double mu;
     State(double m) {mu = m;};
     State* update() { return new State(mu + 1); }

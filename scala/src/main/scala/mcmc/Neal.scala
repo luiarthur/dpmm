@@ -7,23 +7,25 @@ object Neal {
     logf: (Double,Int)=>Double, 
     logg0: Double=>Double, rg0: ()=>Double,
     mh:(Double,Double=>Double,Double=>Double,Double)=>Double=MH.metropolis, 
-    cs: Double, clusterUpdates:Int) = { // assumes m = 1
+    cs: Double) = { // assumes m = 1
 
     def f(x:Double,i:Int) = math.exp(logf(x,i))
     val n = t.length
-    def removeAt(i: Int, x: Vector[Double]) = {
-      val sa = x.splitAt(i)
-      sa._1 ++ sa._2.tail
-    }
+
+    val mapUT = collection.mutable.Map[Double,Int]()
+    t foreach { ti => if (mapUT.contains(ti)) mapUT(ti) += 1 else mapUT(ti) = 1 }
 
     def updateAt(i: Int, t: Vector[Double]): Vector[Double] = {
       if (i == n) t else {
-        val tMinus = removeAt(i,t)
-        val mapUT = tMinus.groupBy(identity).mapValues(_.length).toVector
-        val aux = if ( tMinus.contains(t(i)) ) rg0() else t(i)
-        val probExisting = mapUT.map(ut => ut._2 * f(ut._1,i))
+        mapUT(t(i)) -= 1
+        val aux = if (mapUT( t(i) ) > 0) rg0() else {
+          mapUT.remove( t(i) )
+          t(i)
+        }
+        //val probExisting = mapUT.map(ut => ut._2 * f(ut._1,i)).toVector
+        val probExisting = mapUT.map(ut => ut._2 * f(ut._1,i)).toVector
         val pAux = alpha * f(aux, i)
-        val uT = mapUT.map(_._1)
+        val uT = mapUT.keys.toVector
         val newTi = wsample(uT :+ aux, probExisting :+ pAux)
         updateAt(i+1, t.updated(i,newTi))
       }
@@ -35,13 +37,8 @@ object Neal {
 
       t.distinct.foreach { curr =>
         val idx = tWithIndex.filter(_._1 == curr).map(_._2)
-
         def ll(v:Double) = idx.map( logf(v,_) ).sum
-
-        def loop(v:Double,it:Int):Double = 
-          if (it==0) v else mh(v,ll,logg0,cs)
-
-        val newVal = loop(curr,clusterUpdates)
+        val newVal = mh(curr, ll, logg0, cs)
 
         idx.foreach { i => out(i) = newVal }
       }

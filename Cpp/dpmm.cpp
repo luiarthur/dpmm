@@ -1,5 +1,6 @@
 #include<Rcpp.h>
 #include<functional> // std::function
+#include<ctime>
 #include<map>
 
 using namespace Rcpp;
@@ -158,6 +159,7 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
   auto lg0 = [](double p){return 0.0;};
   auto rg0 = [](){return R::runif(0,1);};
 
+  // gibbs loop
   for (int i=0; i<B+burn; i++) {
     if (i <= burn) {
       out(_,0) = algo8(alpha,out(_,0),lf,lg0,rg0,metLogit,cs);

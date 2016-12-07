@@ -2,8 +2,9 @@ library(rcommon)
 library(Rcpp)
 sourceCpp("dpmm.cpp")
 
-N <- 1000 # 16 seconds on big screwtape
-p <- sort(sample(c(.1,.3,.5,.7,.9),N,replace=TRUE))
+#N <- 6000 # 70 seconds
+N <- 100
+p <- sort(sample(c(.1,.5,.9),N,replace=TRUE))
 
 m <- rep(100,N)
 y <- rbinom(N, m, p)
@@ -16,4 +17,26 @@ add.errbar(t(apply(out,1,quantile,c(.025,.975))), col='blue', lwd=.5)
 points(y/m, col='red',pch=20,cex=.5)
 
 
+####################################
+times <- matrix(c( 100,  3.73,  1.21, 
+                   200,  9.76,  2.35,
+                   400, 16.67,  3.61,
+                   600, 26.95,  6.29,
+                   800, 48.90,  9.27,
+                  1000, 57.00, 11.21),ncol=3,byrow=TRUE)
+colnames(times) <- c("N", "scala", "cpp")
 
+par(mfrow=c(2,1))
+plot(times[,1], times[,2], cex=2, type='o', pch=20, col='green', lwd=3, 
+     ylim=range(times[,-1]), xlab="N", ylab="Time (seconds)", bty='n',fg='grey',
+     main='Time vs N')
+lines(times[,1], times[,3], cex=2, type='o', pch=20, col='red', lwd=3)
+legend('topleft', legend=c('scala','cpp'), text.col=c('green','red'), text.font=2,
+       bty='n')
+
+plot(times[,1], times[,2] / times[,3], type='o', col='grey', pch=20, cex=2, lwd=3,
+     ylab="Time (seconds)", xlab="N", main="Scala / Cpp Time", bty='n',fg='grey')
+abline(h=1:10, col='grey')
+par(mfrow=c(1,1))
+
+times[,2] / times[,3]

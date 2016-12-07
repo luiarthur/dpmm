@@ -56,7 +56,7 @@ class TestSuite extends FunSuite {
     if (out.toSet == setParam) out else simParam(setParam, n)
   }
   test("DP Binomial Test") {
-    val N = 30
+    val N = 100
     val M = 100
     val vTruth = simParam(Set(.1,.5,.9), N).sorted
     val x = Vector.tabulate(N)(i => Rand.nextBinomial(M,vTruth(i)))
@@ -70,12 +70,12 @@ class TestSuite extends FunSuite {
         def rg0() = Rand.nextUniform(0,1)
 
         new State(Neal.algo8(alpha=1, v, logf, logg0, rg0, cs=1, 
-                             mh=MH.metLogit,clusterUpdates=1))
+                             mh=MH.metLogit))
       }
     }
 
     val init = new State(Vector.fill(N)(.5))
-    val out = timer {init.sample(B=2000,burn=10000,printEvery=100)}
+    val out = timer {init.sample(B=2000,burn=10000,printEvery=1000)}
     val v = out.map(_.v.toArray).toArray
     println("acc v1: "+v.map(_.head).distinct.length.toDouble / out.length)
 
@@ -118,7 +118,7 @@ class TestSuite extends FunSuite {
         def rg0() = Rand.nextGaussian(0,sd)
 
         new State(Neal.algo8(alpha=1, mu, logf, logg0, rg0, cs=1, 
-                             mh=MH.metropolis,clusterUpdates=1))
+                             mh=MH.metropolis))
       }
     }
 

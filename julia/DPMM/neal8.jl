@@ -6,15 +6,27 @@ function neal8(a::Float64, θ::Vector{Float64},
   const oneToN = collect(1:n)
   const newθ = copy(θ)
 
+  const mapUT = countmap(θ)
+
   # update each element
   for i in 1:n
-    const θ₋ᵢ = newθ[1:end .!= i] # all but i-th element
-    const mapUT = countmap(θ₋ᵢ)
-    const aux = in(newθ[i], θ₋ᵢ) ? rg0() : newθ[i]
+    mapUT[newθ[i]] -= 1
+    if mapUT[newθ[i]] > 0 
+      aux = rg0()
+    else
+      delete!(mapUT,newθ[i])
+      aux = newθ[i]
+    end
     const probExisting = [ut[2] * f(ut[1],i) for ut in mapUT] #10x slower than scala
     const probAux = a * f(aux, i)
     const ut = collect(keys(mapUT)) #10x slower than scala
     newθ[i] = wsample([ut;aux], [probExisting; probAux])
+
+    if haskey(mapUT,newθ[i])
+      mapUT[newθ[i]] += 1
+    else
+      mapUT[newθ[i]] = 1
+    end
   end
 
   # update by cluster

@@ -56,7 +56,7 @@ class TestSuite extends FunSuite {
     if (out.toSet == setParam) out else simParam(setParam, n)
   }
   test("DP Binomial Test") {
-    val N = 400
+    val N = 100
     val M = 100
     val vTruth = simParam(Set(.1,.5,.9), N).sorted
     val x = Vector.tabulate(N)(i => Rand.nextBinomial(M,vTruth(i)))

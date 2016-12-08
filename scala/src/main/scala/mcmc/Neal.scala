@@ -27,6 +27,9 @@ object Neal {
         val pAux = alpha * f(aux, i)
         val uT = mapUT.keys.toVector
         val newTi = wsample(uT :+ aux, probExisting :+ pAux)
+
+        if (mapUT.contains(newTi)) mapUT(newTi) += 1 else mapUT(newTi) = 1
+
         updateAt(i+1, t.updated(i,newTi))
       }
     }
@@ -35,6 +38,7 @@ object Neal {
       val out = Array.ofDim[Double](n)
       val tWithIndex = t.zipWithIndex
 
+      //mapUT.keys.foreach { curr =>
       t.distinct.foreach { curr =>
         val idx = tWithIndex.filter(_._1 == curr).map(_._2)
         def ll(v:Double) = idx.map( logf(v,_) ).sum

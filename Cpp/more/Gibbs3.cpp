@@ -1,5 +1,6 @@
 #include<iostream>
 #include<vector>
+#include<algorithm>
 
 class GibbsState {
   public:
@@ -46,4 +47,11 @@ auto y = static_cast<State*>(x[0])
 
 std::vector<State*> v(x.size())
 for (int i=0; i<x.size(); i++) { v[i] = static_cast<State*>(x[i]); }
-std::copy(x.begin(), x.end(), v.begin());
+
+//std::transform(x.begin(),x.end(),[](GibbsState*vi){return static_cast<State*>(vi);})
+//
+//template <typename Collection,typename unop>
+//  Collection map(Collection col,unop op) {
+//  std::transform(col.begin(),col.end(),col.begin(),op);
+//  return col;
+//}

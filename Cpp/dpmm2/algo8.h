@@ -1,50 +1,6 @@
-#include<Rcpp.h>
-#include<functional> // std::function
-#include<ctime>
-#include<map>
+#include "metropolis.h"
 
-using namespace Rcpp;
-
-// Enable C++11 via this plugin (Rcpp 0.10.3 or later)
-// [[Rcpp::plugins("cpp11")]]
-
-
-double logit(double p) {
-  return log(p / (1-p));
-}
-
-double invLogit(double x) {
-  return 1 / (1 + exp(-x));
-}
-
-double metropolis(double curr, std::function<double(double)> ll, std::function<double(double)> lp, double stepSig)
-{
-  const double cand = R::rnorm(curr,stepSig);
-  const double u = R::runif(0,1);
-  double out;
-
-  if (ll(cand) + lp(cand) - ll(curr) - lp(curr) > log(u)) {
-    out = cand;
-  } else {
-    out = curr;
-  }
-
-  return out;
-}
-
-double metLogit(double curr, std::function<double(double)> ll, std::function<double(double)> lp, double stepSig)
-{
-  auto lp_logit = [lp](double logit_p) { // capture lp in []
-    const double p = invLogit(logit_p);
-    const double log_J = -logit_p + 2 * log(p);
-    return lp(p) + log_J;
-  };
-  auto ll_logit = [ll](double logit_p) { return ll(invLogit(logit_p)); };
-  return invLogit(metropolis(logit(curr), ll_logit, lp_logit, stepSig));
-}
-
-
-int wsample_index(double p[], int n) { // GOOD
+int wsample_index(double p[], int n) {
   const double p_sum = std::accumulate(p, p+n, 0.0);
   const double u = R::runif(0,p_sum);
 
@@ -57,10 +13,6 @@ int wsample_index(double p[], int n) { // GOOD
   } while (cumsum < u);
 
   return i-1;
-}
-
-double wsample(double x[], double p[], int n) { // GOOD
-  return x[wsample_index(p,n)];
 }
 
 
@@ -149,29 +101,4 @@ NumericVector algo8(double alpha, NumericVector t,
   return NumericVector(newT.begin(), newT.end());
 }
 
-//[[Rcpp::export]]
-NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int B, int burn, int printEvery) {
 
-  NumericMatrix out(y.size(),B);
-  out(_,0) = NumericVector(y.size(),0.5);
-
-  auto lf = [y,m](double p, int i) {return y[i]*log(p)+(m[i]-y[i])*log(1-p);};
-  auto lg0 = [](double p){return 0.0;};
-  auto rg0 = [](){return R::runif(0,1);};
-
-  // gibbs loop
-  for (int i=0; i<B+burn; i++) {
-    if (i <= burn) {
-      out(_,0) = algo8(alpha,out(_,0),lf,lg0,rg0,metLogit,cs);
-    } else {
-      out(_,i-burn) = algo8(alpha,out(_,i-burn-1),lf,lg0,rg0,metLogit,cs);
-    }
-
-    if (printEvery > 0 && (i+1) % printEvery == 0) {
-      Rcout << "\rProgress:  " << i+1 << "/" << B+burn << "\t";
-    }
-  }
-
-  Rcout << std::endl;
-  return out;
-}

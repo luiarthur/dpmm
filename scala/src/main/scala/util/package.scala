@@ -15,13 +15,14 @@ package object util {
 
   // weighted sampling
   def wsample(x: Vector[Double], p: Vector[Double]) = {
-    require(p.min>=0)
-    require(p.length == x.length)
-    val sump = p.sum
-    val rescaledP = if (sump == 1) p else p.map(pi => pi / sump)
-    val u = Rand.nextUniform(0,1)
-    val cumP = rescaledP.scanLeft(0.0)(_+_).tail
-    x.view.zip(cumP).dropWhile(_._2<u).head._1
+    val u = Rand.nextUniform(0,p.sum)
+    var cumsum = p(0)
+    var i = 1
+    while (cumsum < u) {
+      cumsum += p(i)
+      i += 1
+    }
+    x(i-1)
   }
 
   def round(x: Double, d: Int=4) = {

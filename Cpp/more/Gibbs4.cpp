@@ -1,7 +1,6 @@
 #include<iostream>
 #include<vector>
-#include "map.h"
-
+#include "gibbs.h"
 
 class State {
   public:

@@ -13,15 +13,16 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
     public:
       NumericVector v;
       State(NumericVector v_in) {v = v_in;};
-      virtual State* update() const {
-        return new State(algo8(alpha, v, lg, lg0, rg0, metLogit, cs));
-      };
-    private:
-      static auto lf = [y,m](double p, int i) {
+
+      auto lf = [y,m](double p, int i) {
         return y[i]*log(p)+(m[i]-y[i])*log(1-p);
       };
-      static auto lg0 = [](double p){return 0.0;};
-      static auto rg0 = [](){return R::runif(0,1);};
+      //static auto lg0 = [](double p){return 0.0;};
+      //static auto rg0 = [](){return R::runif(0,1);};
+
+      //virtual State* update() const {
+      //  return new State(algo8(alpha, v, lg, lg0, rg0, metLogit, cs));
+      //};
   };
 
   //std::vector<double> v(y.size(), 0.5);
@@ -32,3 +33,19 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
 
   return out;
 }
+
+/*
+
+double f(double x) {
+  class State {
+    public:
+      double y;
+      auto f1 = []()->double { return this->y; };
+  };
+
+  State s;
+  s.y = 1.0;
+
+  return s.f1();
+}
+ */

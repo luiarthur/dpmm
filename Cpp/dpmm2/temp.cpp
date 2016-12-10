@@ -1,13 +1,14 @@
 #include <functional>
 #include <vector>
+#include <iostream>
 
 template <class D>
 class State {
   D data;
-  State update() = 0;
+  State update() {return this;};
   std::vector<State> sample(int B, int burn, int printEvery) {
     std::vector<State> out(B);
-    out[0] = init;
+    out[0] = this;
 
     for (int i=0; i<B+burn; i++) {
       if (i <= burn) {
@@ -17,11 +18,11 @@ class State {
       }
 
       if (printEvery > 0 && (i+1) % printEvery == 0) {
-        Rcout << "\rProgress:  " << i+1 << "/" << B+burn << "\t";
+        std::cout << "\rProgress:  " << i+1 << "/" << B+burn << "\t";
       }
     }
 
-    Rcout << std::endl;
+    std::cout << std::endl;
     return out;
   };
 };

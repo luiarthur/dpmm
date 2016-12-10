@@ -2,6 +2,8 @@
 #include<iostream>
 #include<vector>
 
+using namespace Rcpp;
+
 template <typename S>
 std::vector<S*> gibbs(S* init, int B, int burn, int printEvery) {
   std::vector<S*> out(B);

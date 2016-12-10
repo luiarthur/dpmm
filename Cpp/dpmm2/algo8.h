@@ -1,5 +1,7 @@
 #include "metropolis.h"
 
+using namespace Rcpp;
+
 int wsample_index(double p[], int n) {
   const double p_sum = std::accumulate(p, p+n, 0.0);
   const double u = R::runif(0,p_sum);

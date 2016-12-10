@@ -1,6 +1,8 @@
 #include <Rcpp.h>
 #include <functional> // std::function
 
+// [[Rcpp::plugins("cpp11")]]
+
 double logit(double p) {
   return log(p / (1-p));
 }

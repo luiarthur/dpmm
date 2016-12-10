@@ -14,14 +14,15 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
       NumericVector v;
       State(NumericVector v_in) {v = v_in;};
 
-      auto lf = [y,m](double p, int i) {
+      std::function<double(double,int)> lf = [y,m](double p, int i) {
         return y[i]*log(p)+(m[i]-y[i])*log(1-p);
       };
-      //static auto lg0 = [](double p){return 0.0;};
-      //static auto rg0 = [](){return R::runif(0,1);};
+      std::function<double(double)> lg0 = [](double p){return 0.0;};
+      std::function<double()> rg0 = [](){return R::runif(0,1);};
 
+      // this won't work...
       //virtual State* update() const {
-      //  return new State(algo8(alpha, v, lg, lg0, rg0, metLogit, cs));
+      //  return new State(algo8(alpha, v, lf, lg0, rg0, metLogit, cs));
       //};
   };
 
@@ -35,12 +36,12 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
 }
 
 /*
-
+#include<functional>
 double f(double x) {
   class State {
     public:
       double y;
-      auto f1 = []()->double { return this->y; };
+      std::function<double(double)> f1 = [y](double x)->double { return y; };
   };
 
   State s;

@@ -21,9 +21,9 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
       std::function<double()> rg0 = [](){return R::runif(0,1);};
 
       // this won't work...
-      //virtual State* update() const {
-      //  return new State(algo8(alpha, v, lf, lg0, rg0, metLogit, cs));
-      //};
+      State* update() {
+        return new State(algo8(alpha, v, lf, lg0, rg0, metLogit, cs));
+      };
   };
 
   //std::vector<double> v(y.size(), 0.5);

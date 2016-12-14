@@ -69,7 +69,7 @@ class TestSuite extends FunSuite {
         def logg0(vi:Double) = 0.0
         def rg0() = Rand.nextUniform(0,1)
 
-        new State(Neal.algo8(alpha=1, v, logf, logg0, rg0, cs=1, 
+        new State(Neal.algo8(alpha=1, v, logf, logg0, rg0, cs=.3, 
                              mh=MH.metLogit))
       }
     }
@@ -82,6 +82,8 @@ class TestSuite extends FunSuite {
     R.v = v
     R.vTruth = vTruth.toArray
     R.numClus = v.map( vt => vt.distinct.length )
+    R.x = x.toArray
+    R.M = M.toInt
     R eval """
     pdf("src/test/output/plots.pdf")
 
@@ -90,8 +92,9 @@ class TestSuite extends FunSuite {
 
     plot(vTruth,pch=20,ylim=c(0,1),main='v',
          col='grey30',fg='grey',ylab='')
-    points(apply(v,2,mean),col='blue',cex=2)
-    add.errbar(t(apply(v,2,quantile,c(.025,.975))),col='blue')
+    points(apply(v,2,mean),col='blue',pch=20)
+    add.errbar(t(apply(v,2,quantile,c(.025,.975))),col='blue',lwd=.5)
+    points(x/M, col='red',pch=20,cex=.5)
 
     minor <- function() plot(v[,1],col='grey',type='l',bty='n',axes=F,xlab='',ylab='')
     plotInPlot(minor,'topleft')

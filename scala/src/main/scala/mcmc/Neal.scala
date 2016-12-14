@@ -22,7 +22,6 @@ object Neal {
           mapUT.remove( t(i) )
           t(i)
         }
-        //val probExisting = mapUT.map(ut => ut._2 * f(ut._1,i)).toVector
         val probExisting = mapUT.map(ut => ut._2 * f(ut._1,i)).toVector
         val pAux = alpha * f(aux, i)
         val uT = mapUT.keys.toVector
@@ -38,7 +37,7 @@ object Neal {
       val out = Array.ofDim[Double](n)
       val tWithIndex = t.zipWithIndex
 
-      //mapUT.keys.foreach { curr =>
+      //mapUT.keys.foreach { curr => }
       t.distinct.foreach { curr =>
         val idx = tWithIndex.filter(_._1 == curr).map(_._2)
         def ll(v:Double) = idx.map( logf(v,_) ).sum

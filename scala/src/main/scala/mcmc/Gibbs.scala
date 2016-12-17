@@ -6,7 +6,9 @@ object Gibbs {
     def update(): State
     def sample(B:Int, burn:Int, printEvery:Int=0) = {
       def loop(S:List[State], i:Int): List[State] = {
-        if (i % printEvery == 0) print("\rProgress: " + i +"/"+ (B+burn) + "\t")
+        if (printEvery > 0 && i % printEvery == 0) 
+          print("\rProgress: " + i +"/"+ (B+burn) + "\t")
+
         if (i < B + burn) {
           val newState = if (i <= burn) 
             List(S.head.update)

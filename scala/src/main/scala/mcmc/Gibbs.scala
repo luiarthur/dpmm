@@ -2,7 +2,7 @@ package dpmm.mcmc
 
 object Gibbs {
 
-  abstract class State { 
+  trait State { 
     def update(): State
     def sample(B:Int, burn:Int, printEvery:Int=0) = {
       def loop(S:List[State], i:Int): List[State] = {

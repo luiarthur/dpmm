@@ -3,7 +3,7 @@ include("DPMM.jl")
 using Distributions, RCall
 R"library(rcommon)"
 
-N = 30
+N = 100
 M = 100
 v_truth = sort(sample([.1,.5,.9],N))
 x = [ rand(Binomial(M,v_truth[i])) for i in 1:N]
@@ -17,7 +17,7 @@ function update(v::Vector{Float64})
   DPMM.neal8(alpha,v,lf,lg0,rg0,DPMM.metLogit,cs)
 end
 
-@time out = DPMM.gibbs(fill(.5,N), update, 2000, 10000, printFreq=100);
+@time out = DPMM.gibbs(fill(.5,N),update,2000,10000,printFreq=1000);
 
 v = hcat(out...)'
 acc = vec(mapslices(vj -> length(unique(vj))/size(v,1), v, 1))

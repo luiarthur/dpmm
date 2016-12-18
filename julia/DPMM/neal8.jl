@@ -17,10 +17,15 @@ function neal8(a::Float64, θ::Vector{Float64},
       delete!(mapUT,newθ[i])
       aux = newθ[i]
     end
-    const probExisting = [ut[2] * f(ut[1],i) for ut in mapUT] #10x slower than scala
-    const probAux = a * f(aux, i)
-    const ut = collect(keys(mapUT)) #10x slower than scala
-    newθ[i] = wsample([ut;aux], [probExisting; probAux])
+
+    const prob= [ut[2] * f(ut[1],i) for ut in mapUT]
+    probAux = a * f(aux, i)
+    ut = collect(keys(mapUT))
+
+    append!(prob, probAux)
+    append!(  ut, aux)
+
+    newθ[i] = wsample(ut, prob)
 
     if haskey(mapUT,newθ[i])
       mapUT[newθ[i]] += 1

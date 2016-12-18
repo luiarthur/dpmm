@@ -18,12 +18,12 @@ function neal8(a::Float64, θ::Vector{Float64},
       aux = newθ[i]
     end
 
-    const prob= [ut[2] * f(ut[1],i) for ut in mapUT]
+    prob= [ut[2] * f(ut[1],i) for ut in mapUT]
     probAux = a * f(aux, i)
-    ut = collect(keys(mapUT))
-
     append!(prob, probAux)
-    append!(  ut, aux)
+
+    ut = collect(keys(mapUT))
+    append!(ut, aux)
 
     newθ[i] = wsample(ut, prob)
 

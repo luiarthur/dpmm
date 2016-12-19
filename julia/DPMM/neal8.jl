@@ -1,9 +1,8 @@
 function neal8(a::Float64, θ::Vector{Float64},
-               lf, lg0, rg0, mh, cs::Float64)
+               lf, lf_sum, f, lg0, rg0, mh, cs::Float64)
 
-  f(x::Float64,i::Int) = exp(lf(x,i))
-  const n = length(θ)
-  const oneToN = collect(1:n)
+  const n::Int = length(θ)
+  const oneToN::Vector{Int} = collect(1:n)
   const newθ = copy(θ)
 
   const mapUT = countmap(θ)
@@ -11,18 +10,20 @@ function neal8(a::Float64, θ::Vector{Float64},
   # update each element
   for i in 1:n
     mapUT[newθ[i]] -= 1
-    if mapUT[newθ[i]] > 0 
-      aux = rg0()
-    else
-      delete!(mapUT,newθ[i])
-      aux = newθ[i]
+    const aux = let
+      if mapUT[newθ[i]] > 0 
+        rg0()
+      else
+        delete!(mapUT,newθ[i])
+        newθ[i]
+      end
     end
 
-    prob= [ut[2] * f(ut[1],i) for ut in mapUT]
-    probAux = a * f(aux, i)
+    prob::Vector{Float64} = [ut[2] * f(ut[1],i) for ut in mapUT]
+    probAux::Float64 = a * f(aux, i)
     append!(prob, probAux)
 
-    ut = collect(keys(mapUT))
+    ut::Vector{Float64} = collect(keys(mapUT))
     append!(ut, aux)
 
     newθ[i] = wsample(ut, prob)

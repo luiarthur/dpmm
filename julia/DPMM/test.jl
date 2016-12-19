@@ -12,9 +12,11 @@ function update(v::Vector{Float64})
   const alpha = 1.0
   const cs = 1.0
   lf(t::Float64,i::Int) = x[i]*log(t) + (M-x[i])*log(1-t)
+  lf_sum(t::Float64,i::Int) = 0.0#exp(lf(t,i))
+  f(t::Float64,i::Int) = t^(x[i]) * (1-t)^(M-x[i])
   lg0(v::Float64) = 0.0
   rg0() = rand()
-  DPMM.neal8(alpha,v,lf,lg0,rg0,DPMM.metLogit,cs)
+  DPMM.neal8(alpha,v,lf,lf_sum,f,lg0,rg0,DPMM.metLogit,cs)
 end
 
 @time out = DPMM.gibbs(fill(.5,N),update,2000,10000,printFreq=1000);

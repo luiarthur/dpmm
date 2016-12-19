@@ -34,13 +34,14 @@ function metropolis(curr::Float64, ll, lp, cs::Float64)
   return new_state
 end
 
+logit(p::Float64) = log(p / (1.0-p))
+invlogit(x::Float64) = 1.0 / (1.0+exp(-x))
+
 function metLogit(curr::Float64, ll, lp, cs::Float64)
-  logit(p::Float64) = log(p / (1-p))
-  invlogit(x::Float64) = 1 / (1+exp(-x))
 
   function lp_logit(logit_p::Float64)
     const p = invlogit(logit_p)
-    const logJ = -logit_p + 2*log(p)
+    const logJ = -logit_p + 2.0*log(p)
     return lp(p) + logJ
   end
   

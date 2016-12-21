@@ -64,40 +64,40 @@ double wsample(double x[], double p[], int n) { // GOOD
 }
 
 
-NumericVector algo8(double alpha, NumericVector t, 
-                    std::function<double(double,int)> lf,
-                    std::function<double(double)> lg0,
-                    std::function<double()> rg0,
-                    std::function<double(double,
-                                         std::function<double(double)>,
-                                         std::function<double(double)>,
-                                         double)> mh,
-                    double cs) {
+void algo8(double alpha, double* t_old, double* t_new, int n, double cs,
+           std::function<double(double,int)> lf,
+           std::function<double(double)> lg0,
+           std::function<double()> rg0,
+           std::function<double(double,
+                                std::function<double(double)>,
+                                std::function<double(double)>,
+                                double)> mh) {
+
   auto f = [lf](double x, int i){ return exp(lf(x,i)); };
   const int n = t.size();
-  std::vector<double> newT(t.begin(), t.end());
 
   // create a map of unique t's
   std::map<double,int> map_t_count;
   for (int i=0; i<n; i++) {
-    if (map_t_count.find( t[i] ) != map_t_count.end()) 
+    if (map_t_count.find( t_old[i] ) != map_t_count.end()) 
     { // if key exists
-      map_t_count[t[i]]++;
+      map_t_count[t_old[i]]++;
     } else {
-      map_t_count[t[i]] = 1;
+      map_t_count[t_old[i]] = 1;
     }
+    t_new[i] = t_old[i];
   }
 
   // update each element in t
   for (int i=0; i<n; i++) {
-    map_t_count[newT[i]]--;
+    map_t_count[t_new[i]]--;
 
     double aux;
-    if (map_t_count[newT[i]] > 0) {
+    if (map_t_count[t_new[i]] > 0) {
       aux = rg0();
     } else {
-      aux = newT[i];
-      map_t_count.erase(newT[i]);
+      aux = t_new[i];
+      map_t_count.erase(t_new[i]);
     }
 
     double probAux = alpha * f(aux,i);
@@ -116,21 +116,21 @@ NumericVector algo8(double alpha, NumericVector t,
       k++;
     }
 
-    newT[i] = unique_t[wsample_index(prob,K)];
-    if (map_t_count.find( newT[i] ) != map_t_count.end()) {
-      map_t_count[newT[i]]++;
+    t_new[i] = unique_t[wsample_index(prob,K)];
+    if (map_t_count.find( t_new[i] ) != map_t_count.end()) {
+      map_t_count[t_new[i]]++;
     } else {
-      map_t_count[newT[i]] = 1;
+      map_t_count[t_new[i]] = 1;
     }
   }
 
   // update by cluster
   std::map<double,std::vector<int>> map_t_idx;
   for (int i=0; i<n; i++) {
-    if (map_t_idx.find( newT[i] ) != map_t_idx.end()) { // if key exists
-      map_t_idx[newT[i]].push_back(i);
+    if (map_t_idx.find( t_new[i] ) != map_t_idx.end()) { // if key exists
+      map_t_idx[new_t[i]].push_back(i);
     } else {
-      map_t_idx[newT[i]] = {i};
+      map_t_idx[new_t[i]] = {i};
     }
   }
   for (auto const& ut : map_t_idx) {
@@ -142,39 +142,91 @@ NumericVector algo8(double alpha, NumericVector t,
     };
     auto new_tj = mh(ut.first, ll, lg0, cs);
     for (int i=0; i<idx.size(); i++) {
-      newT[idx[i]] = new_tj;
+      t_new[idx[i]] = new_tj;
     }
   }
-
-  return NumericVector(newT.begin(), newT.end());
 }
 
 // want to do all this most efficiently without NumericVector's. Just vectors.
 // then make wrapper for R.
 
-//[[Rcpp::export]]
-NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int B, int burn, int printEvery) {
+struct State { double* v; }
 
-  NumericMatrix out(y.size(),B);
-  out(_,0) = NumericVector(y.size(),0.5);
+std::vector<State> gibbs(State init, 
+                         update std::function<void(State*, State*)>, 
+                         int B, int burn, int burn, int every) {
 
-  auto lf = [y,m](double p, int i) {return y[i]*log(p)+(m[i]-y[i])*log(1-p);};
-  auto lg0 = [](double p){return 0.0;};
-  auto rg0 = [](){return R::runif(0,1);};
+  std::vector<State> out(B);
+  out[0] = init;
 
-  // gibbs loop
   for (int i=0; i<B+burn; i++) {
     if (i <= burn) {
-      out(_,0) = algo8(alpha,out(_,0),lf,lg0,rg0,metLogit,cs);
+      update(&out[0], &out[0]);
     } else {
-      out(_,i-burn) = algo8(alpha,out(_,i-burn-1),lf,lg0,rg0,metLogit,cs);
+      update(&out[i-burn], &out[i-burn-1]);
     }
 
-    if (printEvery > 0 && (i+1) % printEvery == 0) {
+    if (every > 0 && (i+1) % every == 0) {
       Rcout << "\rProgress:  " << i+1 << "/" << B+burn << "\t";
     }
   }
 
-  Rcout << std::endl;
+  if (every >0) { Rcout << std::endl; }
+
+  return out
+}
+
+//[[Rcpp::export]]
+NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int B, int burn, int printEvery) {
+
+
+  auto update = [y,m] (State* s_old, State* s_new) {
+    auto lf = [y,m](double p, int i) {return y[i]*log(p)+(m[i]-y[i])*log(1-p);};
+    auto lg0 = [](double p){return 0.0;};
+    auto rg0 = [](){return R::runif(0,1);};
+    int n = y.size();
+
+    algo8(alpha,s_old.v,s_new.v,n,lf,lg0,rg0,metLogit,cs);
+  }
+
+  State init = new State{ vector(y.size(),0.5) };
+
+  // gibbs
+
   return out;
 }
+
+/*
+#include<vector>
+#include<array>
+#include<iostream>
+#include<functional>
+
+struct State { double* x; }
+State init;
+int n = 100;
+auto y = (double*) malloc(n);
+init.x = y;
+
+std::vector<State> gibbs(State* init, 
+                         update std::function<void(State*, State*)>, 
+                         int B, int burn, int burn) {
+
+  std::vector<State> out(B);
+  out[0] = *init;
+
+  for (int i=0; i<B+burn; i++) {
+    if (i <= burn) {
+      update(&out[0], &out[0]);
+    } else {
+      update(&out[i-burn], &out[i-burn-1]);
+    }
+  }
+
+  if (every > 0) { cout << std::endl; }
+
+  return out
+}
+
+free(y);
+ */

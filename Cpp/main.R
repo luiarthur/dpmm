@@ -18,6 +18,17 @@ points(y/m, col='red',pch=20,cex=.5)
 
 
 ####################################
+# Test parallel speed and behavior
+library(doMC)
+registerDoMC(8)
+sim <- function(seed=1) {
+  set.seed(seed)
+  fit(y,m,alpha=1,cs=1,B=2000,burn=10000,printEvery=1000)
+}
+system.time(out_par <- foreach(i=1:8) %dopar% sim(i))
+sapply(out_par, sum) # indeed faster and replicable
+
+####################################
 times <- matrix(c( 100,  2.67,  1.21, 
                    200,  6.37,  2.35,
                    400, 12.96,  3.61,
@@ -41,3 +52,4 @@ abline(h=1:10, col='grey')
 par(mfrow=c(1,1))
 
 times[,2] / times[,3]
+

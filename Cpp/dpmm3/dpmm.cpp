@@ -198,22 +198,31 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
 
 /*
 #include<vector>
-#include<array>
 #include<iostream>
 #include<functional>
 
-struct State { double* x; }
+
+struct State { std::vector<double> v; }
 State init;
-int n = 100;
-auto y = (double*) malloc(n);
-init.x = y;
 
-std::vector<State> gibbs(State* init, 
-                         update std::function<void(State*, State*)>, 
-                         int B, int burn, int burn) {
+const int N = 10;
+std::vector<double> init_v(N);
+init.v = init_v;
 
-  std::vector<State> out(B);
-  out[0] = *init;
+State update(State s) { return s; }
+
+
+std::vector<State> update2(State s) {
+  std::vector<State> out(10);
+  return out;
+}
+
+std::vector<State*> gibbs(State* init, 
+                         std::function<void(State*, State*)> update, 
+                         int B, int burn) {
+
+  std::vector<State*> out(B);
+  out[0] = *int;
 
   for (int i=0; i<B+burn; i++) {
     if (i <= burn) {
@@ -223,10 +232,10 @@ std::vector<State> gibbs(State* init,
     }
   }
 
-  if (every > 0) { cout << std::endl; }
-
-  return out
+  return out;
 }
 
-free(y);
- */
+
+
+std::vector<double> x(10)
+*/

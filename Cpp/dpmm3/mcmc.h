@@ -13,8 +13,9 @@ template <typename S>
 std::vector<S> gibbs(S init, std::function<void(S&,S&)> update, 
                      int B, int burn, int print_every) {
 
+  // initialize output
   std::vector<S> out(B);
-  out[0] = init;
+  for (int i=0; i<B; i++) {out[i] = init;}
 
   for (int i=0; i<B+burn; i++) {
     if (i <= burn) {

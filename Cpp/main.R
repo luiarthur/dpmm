@@ -3,12 +3,14 @@ library(Rcpp)
 sourceCpp("dpmm.cpp")
 
 #N <- 6000 # 70 seconds
+set.seed(1)
 N <- 100
 p <- sort(sample(c(.1,.5,.9),N,replace=TRUE))
 
 m <- rep(100,N)
 y <- rbinom(N, m, p)
 
+set.seed(1)
 system.time(out <- fit(y,m,alpha=1,cs=1,B=2000,burn=10000,printEvery=1000))
 
 plot(p,col='grey',pch=20,ylim=c(0,1),las=1,ylab='Probabilities',main="p")

@@ -75,7 +75,8 @@ NumericVector algo8(double alpha, NumericVector t,
                     double cs) {
   auto f = [lf](double x, int i){ return exp(lf(x,i)); };
   const int n = t.size();
-  std::vector<double> newT(t.begin(), t.end());
+  //std::vector<double> newT(t.begin(), t.end());
+  auto newT = t;
 
   // create a map of unique t's
   std::map<double,int> map_t_count;
@@ -146,7 +147,7 @@ NumericVector algo8(double alpha, NumericVector t,
     }
   }
 
-  return NumericVector(newT.begin(), newT.end());
+  return newT;//NumericVector(newT.begin(), newT.end());
 }
 
 //[[Rcpp::export]]

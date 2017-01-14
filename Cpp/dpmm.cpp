@@ -155,7 +155,7 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
   NumericMatrix out(y.size(),B);
   out(_,0) = NumericVector(y.size(),0.5);
 
-  auto lf = [y,m](double p, int i) {return y[i]*log(p)+(m[i]-y[i])*log(1-p);};
+  auto lf = [&y,&m](double p, int i) {return y[i]*log(p)+(m[i]-y[i])*log(1-p);};
   auto lg0 = [](double p){return 0.0;};
   auto rg0 = [](){return R::runif(0,1);};
 

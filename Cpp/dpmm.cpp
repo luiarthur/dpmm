@@ -103,9 +103,9 @@ NumericVector algo8(double alpha, NumericVector t,
 
     double probAux = alpha * f(aux,i);
 
-    const int K = map_t_count.size();
-    double prob[K+1];
-    double unique_t[K+1];
+    const int K = map_t_count.size() + 1;
+    double prob[K];
+    double unique_t[K];
     
     prob[0] = probAux;
     unique_t[0] = aux;
@@ -117,7 +117,7 @@ NumericVector algo8(double alpha, NumericVector t,
       k++;
     }
 
-    newT[i] = unique_t[wsample_index(prob,K+1)];
+    newT[i] = unique_t[wsample_index(prob,K)];
     if (map_t_count.find( newT[i] ) != map_t_count.end()) {
       map_t_count[newT[i]]++;
     } else {

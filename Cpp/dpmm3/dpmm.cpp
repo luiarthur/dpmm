@@ -9,7 +9,7 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha,
                   double cs, int B, int burn, int printEvery) {
 
   auto update = [alpha, cs, y, m] (State& s_old, State& s_new) {
-    auto lf = [y,m](double p, int i) {
+    auto lf = [&y,&m](double p, int i) {
       return y[i]*log(p)+(m[i]-y[i])*log(1-p);
     };
     auto lg0 = [](double p){return 0.0;};

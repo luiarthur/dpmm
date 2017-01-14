@@ -38,7 +38,7 @@ function neal8(a::Float64, θ::Vector{Float64},
 
   # update by cluster
   const θ_star = unique(newθ)
-  for θⱼ in unique(θ_star)
+  for θⱼ in θ_star
     const idx = oneToN[newθ .== θⱼ]#find(ti -> ti == θⱼ, newθ)
     ll(t::Float64) = sum([lf(t,i) for i in idx])
     newθ[idx] = mh(θⱼ,ll,lg0,cs)

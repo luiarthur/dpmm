@@ -117,7 +117,7 @@ NumericVector algo8(double alpha, NumericVector t,
       k++;
     }
 
-    newT[i] = unique_t[wsample_index(prob,K)];
+    newT[i] = unique_t[wsample_index(prob,K+1)];
     if (map_t_count.find( newT[i] ) != map_t_count.end()) {
       map_t_count[newT[i]]++;
     } else {

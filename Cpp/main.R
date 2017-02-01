@@ -7,7 +7,7 @@ set.seed(1)
 N <- 100
 p <- sort(sample(c(.1,.5,.9),N,replace=TRUE))
 
-m <- rep(100,N)
+m <- rep(30,N)
 y <- rbinom(N, m, p)
 
 set.seed(1)

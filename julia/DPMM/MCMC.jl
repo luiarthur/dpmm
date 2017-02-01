@@ -41,7 +41,8 @@ function metLogit(curr::Float64, ll, lp, cs::Float64)
 
   function lp_logit(logit_p::Float64)
     const p = invlogit(logit_p)
-    const logJ = -logit_p + 2.0*log(p)
+    #const logJ = -logit_p + 2.0*log(p)  #???
+    const logJ = -logit_p + 2.0*log(1-p) #???
     return lp(p) + logJ
   end
   

@@ -21,7 +21,8 @@ object MH {
 
     def logLogitPrior(logitP: Double) = {
       val p = invLogit(logitP)
-      val logJ = -logitP + 2*math.log(p)
+      //val logJ = -logitP + 2*math.log(p) // ???
+      val logJ = -logitP + 2*math.log(1-p) // ???
       lp(p) + logJ 
     }
 

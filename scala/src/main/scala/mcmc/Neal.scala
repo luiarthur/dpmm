@@ -12,8 +12,6 @@ object Neal {
     def f(x:Double,i:Int) = math.exp(logf(x,i))
     val n = t.length
 
-    //val mapUT = collection.mutable.Map[Double,Int]()
-    //t foreach { ti => if (mapUT.contains(ti)) mapUT(ti) += 1 else mapUT(ti) = 1 }
     val mapUT = collection.mutable.Map[Double,Int]().withDefaultValue(0)
     t foreach { ti => mapUT(ti) += 1 }
 
@@ -29,7 +27,6 @@ object Neal {
         val uT = mapUT.keys.toVector
         val newTi = wsample(uT :+ aux, probExisting :+ pAux)
 
-        //if (mapUT.contains(newTi)) mapUT(newTi) += 1 else mapUT(newTi) = 1
         mapUT(newTi) += 1
 
         updateAt(i+1, t.updated(i,newTi))

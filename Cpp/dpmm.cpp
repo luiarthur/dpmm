@@ -8,6 +8,11 @@ using namespace Rcpp;
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins("cpp11")]]
 
+inline void printIt(int i, int every, int total) {
+  if (every > 0 && (i+1) % every == 0) { \
+    Rcout << "\rProgress:  " << i+1 << "/" << total << "\t";\
+  } 
+}
 
 double logit(double p) {
   return log(p / (1-p));
@@ -19,8 +24,8 @@ double invLogit(double x) {
 
 double metropolis(double curr, std::function<double(double)> ll, std::function<double(double)> lp, double stepSig)
 {
-  const double cand = R::rnorm(curr,stepSig);
-  const double u = R::runif(0,1);
+  double const cand = R::rnorm(curr,stepSig);
+  double const u = R::runif(0,1);
   double out;
 
   if (ll(cand) + lp(cand) - ll(curr) - lp(curr) > log(u)) {
@@ -35,9 +40,9 @@ double metropolis(double curr, std::function<double(double)> ll, std::function<d
 double metLogit(double curr, std::function<double(double)> ll, std::function<double(double)> lp, double stepSig)
 {
   auto lp_logit = [lp](double logit_p) { // capture lp in []
-    const double p = invLogit(logit_p);
+    double const p = invLogit(logit_p);
     //const double log_J = -logit_p + 2*log(p); //???
-    const double log_J = -logit_p + 2*log(1-p); //???
+    double const log_J = -logit_p + 2*log(1-p); //???
     return lp(p) + log_J;
   };
   auto ll_logit = [ll](double logit_p) { return ll(invLogit(logit_p)); };
@@ -46,8 +51,8 @@ double metLogit(double curr, std::function<double(double)> ll, std::function<dou
 
 
 int wsample_index(double p[], int n) { // GOOD
-  const double p_sum = std::accumulate(p, p+n, 0.0);
-  const double u = R::runif(0,p_sum);
+  double const p_sum = std::accumulate(p, p+n, 0.0);
+  double const u = R::runif(0,p_sum);
 
   int i = 0;
   double cumsum = 0;
@@ -75,7 +80,7 @@ NumericVector algo8(double alpha, NumericVector t,
                                          double)> mh,
                     double cs) {
   auto f = [lf](double x, int i){ return exp(lf(x,i)); };
-  const int n = t.size();
+  auto const n = t.size();
   //std::vector<double> newT(t.begin(), t.end());
   auto newT = t;
 
@@ -99,7 +104,7 @@ NumericVector algo8(double alpha, NumericVector t,
 
     double probAux = alpha * f(aux,i);
 
-    const int K = map_t_count.size() + 1;
+    int const K = map_t_count.size() + 1;
     double prob[K];
     double unique_t[K];
     
@@ -148,21 +153,23 @@ NumericMatrix fit(NumericVector y, NumericVector m, double alpha, double cs, int
   NumericMatrix out(y.size(),B);
   out(_,0) = NumericVector(y.size(),0.5);
 
-  auto lf = [&y,&m](double p, int i) {return y[i]*log(p)+(m[i]-y[i])*log(1-p);};
+  auto lf = [&y,&m](double p, int i) {
+    return y[i]*log(p)+(m[i]-y[i])*log(1-p);
+  };
   auto lg0 = [](double p){return 0.0;};
   auto rg0 = [](){return R::runif(0,1);};
 
   // gibbs loop
   for (int i=0; i<B+burn; i++) {
     if (i <= burn) {
-      out(_,0) = algo8(alpha,out(_,0),lf,lg0,rg0,metLogit,cs);
+      out(_, 0) = 
+        algo8(alpha, out(_, 0), lf, lg0, rg0, metLogit, cs);
     } else {
-      out(_,i-burn) = algo8(alpha,out(_,i-burn-1),lf,lg0,rg0,metLogit,cs);
+      out(_, i-burn) = 
+        algo8(alpha, out(_, i-burn-1), lf, lg0, rg0, metLogit, cs);
     }
 
-    if (printEvery > 0 && (i+1) % printEvery == 0) {
-      Rcout << "\rProgress:  " << i+1 << "/" << B+burn << "\t";
-    }
+    printIt(i, printEvery, B+burn);
   }
 
   Rcout << std::endl;

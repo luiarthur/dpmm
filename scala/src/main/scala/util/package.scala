@@ -16,13 +16,10 @@ package object util {
   // weighted sampling
   def wsample(x: Vector[Double], p: Vector[Double]) = {
     val u = Rand.nextUniform(0,p.sum)
-    var cumsum = p(0)
-    var i = 1
-    while (cumsum < u) {
-      cumsum += p(i)
-      i += 1
+    def loop(i:Int=0, cumsum:Double=0.0): Double = {
+      if (cumsum < u) loop(i+1, cumsum+p(i)) else x(i-1)
     }
-    x(i-1)
+    loop()
   }
 
   def round(x: Double, d: Int=4) = {

@@ -134,13 +134,10 @@ void algo8(double alpha,
   }
 
   // update by cluster
-  std::map<double,std::vector<int>> map_t_idx;
+  // Create a map of unique values to indices
+  std::map<double, std::vector<int>> map_t_idx;
   for (int i=0; i<n; i++) {
-    if (map_t_idx.find( t[i] ) != map_t_idx.end()) { // if key exists
-      map_t_idx[t[i]].push_back(i);
-    } else {
-      map_t_idx[t[i]] = {i};
-    }
+    map_t_idx[t[i]].push_back(i);
   }
   for (auto const& ut : map_t_idx) {
     auto idx = ut.second;

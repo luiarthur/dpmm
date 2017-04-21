@@ -81,8 +81,8 @@ NumericVector algo8(double alpha, NumericVector t,
 
   // create a map of unique t's
   std::map<double,int> map_t_count;
-  for (int i=0; i<n; i++) {
-    map_t_count[t[i]]++;
+  for (auto const& ti : t) {
+    map_t_count[ti]++;
   }
 
   // update each element in t

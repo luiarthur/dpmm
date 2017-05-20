@@ -1,5 +1,6 @@
 library(rcommon)
 library(Rcpp)
+Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
 sourceCpp("dpmm.cpp")
 
 #N <- 6000 # 70 seconds

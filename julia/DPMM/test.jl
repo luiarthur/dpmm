@@ -3,7 +3,7 @@ include("DPMM.jl")
 using Distributions, RCall
 R"library(rcommon)"
 
-N = 100
+N = 600
 M = 100
 v_truth = sort(sample([.1,.5,.9],N))
 x = [ rand(Binomial(M,v_truth[i])) for i in 1:N]

@@ -6,14 +6,14 @@ class TestSuite extends FunSuite {
   import math.{log,pow}
 
   // start R
-  val R = org.ddahl.rscala.callback.RClient()
-  R eval """
-  require('devtools')
-  if ( !("rcommon" %in% installed.packages()) ) {
-    devtools::install_github('luiarthur/rcommon')
-  }
-  library(rcommon)
-  """
+  //val R = org.ddahl.rscala.callback.RClient()
+  //R eval """
+  //require('devtools')
+  //if ( !("rcommon" %in% installed.packages()) ) {
+  //  devtools::install_github('luiarthur/rcommon')
+  //}
+  //library(rcommon)
+  //"""
 
   Rand.reSeed(1)
   test("MH for Binomial data") {
@@ -41,10 +41,10 @@ class TestSuite extends FunSuite {
     println("Truth:          " + pTruth)
     println("Posterior Mean: " + round(pSim.sum / pSim.length,4)+"\n")
 
-    R.p = pSim.toArray
-    R eval " pdf('src/test/output/binom.pdf') "
-    R eval " plotPost(p) "
-    R eval " dev.off() "
+    //R.p = pSim.toArray
+    //R eval " pdf('src/test/output/binom.pdf') "
+    //R eval " plotPost(p) "
+    //R eval " dev.off() "
 
     assert(math.abs(pSim.sum/pSim.length - pTruth) < 1E-1)
   }
@@ -79,32 +79,32 @@ class TestSuite extends FunSuite {
     val v = out.map(_.v.toArray).toArray
     println("acc v1: "+v.map(_.head).distinct.length.toDouble / out.length)
 
-    R.v = v
-    R.vTruth = vTruth.toArray
-    R.numClus = v.map( vt => vt.distinct.length )
-    R.x = x.toArray
-    R.M = M.toInt
-    R eval """
-    pdf("src/test/output/plots.pdf")
+    //R.v = v
+    //R.vTruth = vTruth.toArray
+    //R.numClus = v.map( vt => vt.distinct.length )
+    //R.x = x.toArray
+    //R.M = M.toInt
+    //R eval """
+    //pdf("src/test/output/plots.pdf")
 
-    #par(mfrow=c(1,3))
-    #plot(numClus, main="Number of Clusters")
+    //#par(mfrow=c(1,3))
+    //#plot(numClus, main="Number of Clusters")
 
-    plot(vTruth,pch=20,ylim=c(0,1),main='v',
-         col='grey30',fg='grey',ylab='')
-    points(apply(v,2,mean),col='blue',pch=20)
-    add.errbar(t(apply(v,2,quantile,c(.025,.975))),col='blue',lwd=.5)
-    points(x/M, col='red',pch=20,cex=.5)
+    //plot(vTruth,pch=20,ylim=c(0,1),main='v',
+    //     col='grey30',fg='grey',ylab='')
+    //points(apply(v,2,mean),col='blue',pch=20)
+    //add.errbar(t(apply(v,2,quantile,c(.025,.975))),col='blue',lwd=.5)
+    //points(x/M, col='red',pch=20,cex=.5)
 
-    minor <- function() plot(v[,1],col='grey',type='l',bty='n',axes=F,xlab='',ylab='')
-    plotInPlot(minor,'topleft')
+    //minor <- function() plot(v[,1],col='grey',type='l',bty='n',axes=F,xlab='',ylab='')
+    //plotInPlot(minor,'topleft')
 
-    #plot(v[,ncol(v)],col=rgb(.5,.5,.5,.3),type='l',
-    #     ylim=c(0,1),fg='grey',main='trace plot for v_100')
+    //#plot(v[,ncol(v)],col=rgb(.5,.5,.5,.3),type='l',
+    //#     ylim=c(0,1),fg='grey',main='trace plot for v_100')
 
-    #par(mfrow=c(1,1))
-    dev.off()
-    """
+    //#par(mfrow=c(1,1))
+    //dev.off()
+    //"""
   }
 
   test("DP Normal Test") {
@@ -131,27 +131,27 @@ class TestSuite extends FunSuite {
     println("acc mu: "+mu.map(_.head).distinct.length.toDouble / out.length)
     //println(mu.map(_.head).distinct.toVector)
 
-    R.x = x.toArray
-    R.mu = mu
-    R.muTruth = muTruth.toArray
-    R.numClus = mu.map( mut => mut.distinct.length )
-    R eval """
-    pdf("src/test/output/plotMu.pdf")
+    //R.x = x.toArray
+    //R.mu = mu
+    //R.muTruth = muTruth.toArray
+    //R.numClus = mu.map( mut => mut.distinct.length )
+    //R eval """
+    //pdf("src/test/output/plotMu.pdf")
 
-    #par(mfrow=c(1,2))
-    #plot(numClus, main="Number of Clusters")
+    //#par(mfrow=c(1,2))
+    //#plot(numClus, main="Number of Clusters")
 
-    plot(x)
-    points(muTruth,pch=20, col='grey30',fg='grey',ylab='')
-    points(apply(mu,2,mean),lwd=2,col='blue',cex=1.3)
-    add.errbar(t(apply(mu,2,quantile,c(.025,.975))),co=rgb(0,0,1,.2))
+    //plot(x)
+    //points(muTruth,pch=20, col='grey30',fg='grey',ylab='')
+    //points(apply(mu,2,mean),lwd=2,col='blue',cex=1.3)
+    //add.errbar(t(apply(mu,2,quantile,c(.025,.975))),co=rgb(0,0,1,.2))
 
-    #plot(mu[,ncol(mu)],col=rgb(.5,.5,.5,.3),type='l',
-    #     fg='grey',main='trace plot for mu')
+    //#plot(mu[,ncol(mu)],col=rgb(.5,.5,.5,.3),type='l',
+    //#     fg='grey',main='trace plot for mu')
 
-    #par(mfrow=c(1,1))
-    dev.off()
-    """
+    //#par(mfrow=c(1,1))
+    //dev.off()
+    //"""
   }
 
 

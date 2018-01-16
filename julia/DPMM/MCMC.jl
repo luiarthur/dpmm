@@ -21,7 +21,7 @@ end
 """
 metropolis step with normal proposal
 """
-function metropolis(curr::Float64, ll, lp, cs::Float64)
+function metropolis(curr::Float64, ll::Function, lp::Function, cs::Float64)
 
   const cand = rand(Normal(curr,cs))
 
@@ -37,7 +37,7 @@ end
 logit(p::Float64) = log(p / (1.0-p))
 invlogit(x::Float64) = 1.0 / (1.0+exp(-x))
 
-function metLogit(curr::Float64, ll, lp, cs::Float64)
+function metLogit(curr::Float64, ll::Function, lp::Function, cs::Float64)
 
   function lp_logit(logit_p::Float64)
     const p = invlogit(logit_p)

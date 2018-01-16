@@ -1,5 +1,5 @@
 function neal8(a::Float64, θ::Vector{Float64},
-               lf, lg0, rg0, mh, cs::Float64)
+               lf::Function, lg0::Function, rg0::Function, mh::Function, cs::Float64)
 
   f(x::Float64,i::Int) = exp(lf(x,i))
   const n::Int = length(θ)

@@ -1,5 +1,5 @@
 # compare with the other gibbs
-function gibbs{T}(init::T, update, B::Int, burn::Int; printFreq::Int=0)
+function gibbs{T}(init::T, update::Function, B::Int, burn::Int; printFreq::Int=0)
   const out = Vector{T}(B)
   out[1] = init
 

@@ -6,11 +6,11 @@ R"library(rcommon)"
 N = 600
 M = 100
 v_truth = sort(sample([.1,.5,.9],N))
-x = [ rand(Binomial(M,v_truth[i])) for i in 1:N]
+x = [ rand(Binomial(M,v_truth[i])) for i in 1:N ] .+ 0.0
 
 function update(v::Vector{Float64})
-  const alpha = 1.0
-  const cs = 1.0
+  alpha = 1.0
+  cs = 1.0
   lf(t::Float64,i::Int) = x[i]*log(t) + (M-x[i])*log(1-t)
   lg0(v::Float64) = 0.0
   rg0() = rand()

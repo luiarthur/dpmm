@@ -41,7 +41,7 @@ function neal8(a::Float64, θ::Vector{Float64},
   for θⱼ in θ_star
     idx = oneToN[newθ .== θⱼ]#find(ti -> ti == θⱼ, newθ)
     ll(t::Float64) = sum([lf(t,i) for i in idx])
-    newθ[idx] = mh(θⱼ,ll,lg0,cs)
+    newθ[idx] .= mh(θⱼ,ll,lg0,cs)
   end
 
   return newθ

@@ -3,7 +3,7 @@ include("DPMM.jl")
 using Distributions, RCall
 R"library(rcommon)"
 
-N = 600
+N = 100
 M = 100
 v_truth = sort(sample([.1,.5,.9],N))
 x = [ rand(Binomial(M,v_truth[i])) for i in 1:N ] .+ 0.0
@@ -19,9 +19,10 @@ end
 
 @time out = DPMM.gibbs(fill(.5,N),update,2000,10000,printFreq=1000);
 
-v = hcat(out...)'
-acc = vec(mapslices(vj -> length(unique(vj))/size(v,1), v, 1))
-clusters = mapslices( v_row -> length(unique(v_row)), v, 2 )
+v = Matrix(hcat(out...)')
+
+acc = vec(mapslices(vj -> length(unique(vj))/size(v,1), v, dims=1))
+clusters = mapslices( v_row -> length(unique(v_row)), v, dims=2 )
 
 R"plot($v_truth,ylim=c(0,1),fg='grey',ylab='probability',main='Clusters',pch=20)"
 R"points(apply($v,2,mean),col='blue')"

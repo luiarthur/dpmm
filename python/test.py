@@ -1,10 +1,7 @@
 import mcmc
 import math
 import numpy as np
-import rpy2.robjects as robj
-
-rplot = robj.r('plot')
-
+import matplotlib.pyplot as plt
 
 
 N = 30
@@ -23,5 +20,5 @@ def update(v):
 
 out = mcmc.gibbs([.5]*N, update, 2000, 10000, 1000)
 
-rplot(robj.FloatVector(v_truth),ylab='',pch=20,col='grey')
-
+plt.plot(v_truth)
+plt.show()

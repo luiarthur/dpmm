@@ -7,14 +7,14 @@ from collections import Counter
 def gibbs(init_state, update_fn, B, burn, printFreq):
     out = [init_state] * B
     #
-    for i in xrange(B+burn):
+    for i in range(B+burn):
         if i <= burn:
             out[0] = update_fn(out[0])
         else:
             out[i-burn-1] = update_fn(out[i-burn])
         #
         if printFreq > 0 and (i+1)%printFreq == 0:
-            print "\rProgress: ", i+1, "/", B+burn
+            print("\rProgress: {}/{}".format(i+1, B+burn))
     #
     if printFreq > 0:
         pass # FIXME
@@ -61,7 +61,7 @@ def algo8(alpha, t_old, cs, lf, lg0, rg0, mh):
     map_ut = Counter(t_old)
     #
     # update each element
-    for i in xrange(n):
+    for i in range(n):
         map_ut[t_new[i]] -= 1
         if map_ut[t_new[i]] > 0:
             aux = rg0()
@@ -85,7 +85,7 @@ def algo8(alpha, t_old, cs, lf, lg0, rg0, mh):
     # Update by cluster
     ut = set(t_new)
     for tj in ut:
-        idx = [i for i in xrange(n) if t_new[i] == tj]
+        idx = [i for i in range(n) if t_new[i] == tj]
         ll = lambda t: sum( lf(t,i) for i in idx )
         new_t = mh(tj, ll, lg0, cs)
         for i in idx:
